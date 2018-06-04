@@ -1,0 +1,34 @@
+fileFormatVersion: 2
+guid: f73ebaa74f30946c3b5aa0e08fd80214
+labels:
+- Asset
+- Assets
+- Pivot
+- Anchor
+- Button
+- Text
+- uGUI
+- GUI
+- Layers
+- Import
+- Convert
+- PSD
+- Photoshop
+timeCreated: 1439725802
+licenseType: Store
+PluginImporter:
+  serializedVersion: 1
+  iconMap: {}
+  executionOrder: {}
+  isPreloaded: 0
+  platformData:
+    Any:
+      enabled: 0
+      settings: {}
+    Editor:
+      enabled: 1
+      settings:
+        DefaultValueInitialized: true
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
