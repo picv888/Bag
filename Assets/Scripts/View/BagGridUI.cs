@@ -43,7 +43,6 @@ public class BagGridUI : GridBase {
             //丢弃物品
             //遵守MVC应该写在BagController的，但是为了偷懒。。写在这懒得改了
             int sellItemID = itemID;
-            EquipmentData data = BagData.Instance.GetItem(sellItemID);
             NoticeUI.Instance.ShowNotice("确定丢弃这个装备吗？", () => Debug.Log("不丢了" + sellItemID),
                                          () => AbandonSureCallback(sellItemID));
         }

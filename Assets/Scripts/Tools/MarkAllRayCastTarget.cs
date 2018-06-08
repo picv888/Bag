@@ -13,7 +13,7 @@ public class MarkAllRayCastTarget : MonoBehaviour {
             if (g.raycastTarget) {
                 RectTransform rectTransform = g.transform as RectTransform;
                 rectTransform.GetWorldCorners(fourCorners);
-                Gizmos.color = Color.blue;
+                Gizmos.color = (Gizmos.color == Color.blue)? Color.yellow : Color.blue;
                 for (int i = 0; i < 4; i++)
                     Gizmos.DrawLine(fourCorners[i], fourCorners[(i + 1) % 4]);
             }
