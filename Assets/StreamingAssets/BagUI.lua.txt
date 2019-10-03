@@ -1,0 +1,133 @@
+--因为背包只有一个，所以可以在lua将C#中的这些变量中声明为全局变量
+rectTransform = nil
+grids = {}
+weightText = nil
+pageText = nil
+moneyText = nil
+rightButton = nil
+leftButton = nil
+clearUpButton = nil --整理按钮
+sellAllBtn = nil --一键出售按钮
+
+currentNum = 0 --当前页数
+maxNum = 0 --最大页数， 根据背包里物品数量与当前有多少个格子比较
+
+Awake = function()
+    local rectTransform = this.transform
+    --获取所有的格子
+    grids = this.gameObject:GetComponentsInChildren(typeof(CS.BagGridUI))
+    weightText = rectTransform:Find("CapacityText"):GetComponent("Text")
+    pageText = rectTransform:Find("PageText"):GetComponent("Text")
+    moneyText = rectTransform:Find("MoneyText"):GetComponent("Text")
+    rightButton = rectTransform:Find("RightButton"):GetComponent("Button")
+    leftButton = rectTransform:Find("LeftButton"):GetComponent("Button")
+    clearUpButton = rectTransform:Find("ClearUpButton"):GetComponent("Button")
+    sellAllBtn = rectTransform:Find("SellAllBtn"):GetComponent("Button")
+
+    --按钮注册事件
+    rightButton.onClick:AddListener(RightClick)
+    leftButton.onClick:AddListener(LeftClick)
+    clearUpButton.onClick:AddListener(ClearUpClick)
+    sellAllBtn.onClick:AddListener(SellAllBtnClick)
+end
+
+Start = function()
+    CS.BagData.Instance:updateEvent("+", UpdatePanel)
+    currentNum = 1 --界面一开始，当前页是1
+    UpdatePanel()
+end
+
+--更新界面
+UpdatePanel = function()
+    --更新当前页数的物品， 更新当前页数， 更新当前的负重
+
+    --计算当前的最大页数
+    maxNum = math.ceil(CS.BagData.Instance.Items.Count / grids:GetLength())
+
+    weightText.text =
+        "负重：" .. math.floor(CS.BagData.Instance.CurrentCapacity) .. "/" .. math.floor(CS.BagData.Instance.MaxCapacity)
+    pageText.text = currentNum .. "/" .. maxNum
+    moneyText.text = "金币:" .. CS.BagData.Instance.Money
+
+    --显示当前的页数的物品
+    local startIndex = (currentNum - 1) * grids:GetLength() --（当前页数 - 1） * 格子数量
+    --把从起始索引开始，依次的把物品放在对应的格子上
+    for i = 0, grids:GetLength() - 1 do
+        local grid = grids:GetValue(i)
+        if startIndex + i >= CS.BagData.Instance.Items.Count then
+            --超出了物品的数量，该格子没有物品
+            grid:UpdateItem(-1, "")
+        else
+            item = CS.BagData.Instance.Items[startIndex + i]
+            grid:UpdateItem(item.Id, item.IconName)
+        end
+    end
+end
+
+--翻页的右按钮
+RightClick = function()
+    --判断是当前页是是最后一页
+    if currentNum < maxNum then
+        --不是最后一页
+        currentNum = currentNum + 1
+        UpdatePanel() --当前页数变了，需要更新一下界面的显示
+    end
+end
+
+--翻页的左按钮
+LeftClick = function()
+    --判断当前页数是不是第一页
+    if this.currentNum > 1 then
+        this.currentNum = this.currentNum - 1
+        UpdatePanel() --当前页数变了，需要更新一下界面的显示
+    end
+end
+
+--整理按钮
+ClearUpClick = function()
+    CS.BagController.Instance:ClearUp()
+end
+
+--一键出售按钮点击
+SellAllBtnClick = function()
+    equipments = CS.BagData.Instance.Items
+    if equipments.Count == 0 then
+        --背包里没有装备
+        CS.NoticeUI.Instance:ShowNotice("你的背包什么也没有", nil)
+        return
+    end
+    CS.NoticeUI.Instance:ShowNotice(
+        "一键出售背包里的所有物品",
+        function()
+            print("取消出售了")
+        end,
+        SellAllSureCallBack
+    )
+end
+
+--一键出售提示框，点击确认按钮后的回调
+SellAllSureCallBack = function()
+    equipments = CS.BagData.Instance.Items
+    if equipments.Count == 0 then
+        --背包里没有装备
+        CS.NoticeUI.Instance:ShowNotice("你的背包什么也没有", nil)
+        return
+    end
+    CS.BagData.Instance:SellAllItem()
+end
+
+OnDestroy = function()
+    CS.BagData.Instance:updateEvent("-", UpdatePanel)
+
+    rightButton.onClick:RemoveListener(RightClick)
+    rightButton.onClick:Invoke()
+
+    leftButton.onClick:RemoveListener(LeftClick)
+    leftButton.onClick:Invoke()
+
+    clearUpButton.onClick:RemoveListener(ClearUpClick)
+    clearUpButton.onClick:Invoke()
+
+    sellAllBtn.onClick:RemoveListener(SellAllBtnClick)
+    sellAllBtn.onClick:Invoke()
+end

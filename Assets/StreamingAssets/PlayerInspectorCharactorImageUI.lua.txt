@@ -1,0 +1,11 @@
+﻿Awake = function()
+    this.charactorCametaTransform = CS.UnityEngine.GameObject:Find("CharatorCamera").transform
+end
+
+OnDrag = function(eventData)
+    this.charactorCametaTransform:RotateAround(
+        this.charactorCametaTransform.parent.position,
+        this.charactorCametaTransform.parent.up,
+        1.0 * eventData.delta.x
+    )
+end

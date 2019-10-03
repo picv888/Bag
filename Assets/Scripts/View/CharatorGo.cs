@@ -59,7 +59,6 @@ public class CharatorGo : MonoBehaviour {
     //刷新所有的装备游戏物体
     private void UpdateAllEquipment() {
         List<EquipmentData> equipmentDatas = PlayerData.Instance.Items;
-        Debug.Log("UpdateAllEquipment count:" + equipmentDatas.Count);
         for (int i = 0; i < equipmentDatas.Count; i++) {
             UpdateGameObjectEquipment(equipmentDatas[i], true);
         }

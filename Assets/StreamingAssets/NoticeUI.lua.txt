@@ -1,0 +1,63 @@
+﻿--[[
+    #region 成员变量
+    private Text noticeText;
+    private Button cancelBtn;
+    private Button sureBtn;
+    private Button sureBtn2;
+    private RectTransform rectTransform;
+    private Action onCancel;
+    private Action onSure;
+    #endregion 
+]]
+Awake = function()
+    this.rectTransform = this.transform
+    this.noticeText = this.rectTransform:Find("NoticeText"):GetComponent("Text")
+    this.cancelBtn = this.rectTransform:Find("CancelBtn"):GetComponent("Button")
+    this.sureBtn = this.rectTransform:Find("SureBtn"):GetComponent("Button")
+    this.sureBtn2 = this.rectTransform:Find("SureBtn2"):GetComponent("Button")
+    this.cancelBtn.onClick:AddListener(CancelBtnClick)
+    this.sureBtn.onClick:AddListener(SureBtnClick)
+    this.sureBtn2.onClick:AddListener(SureBtnClick)
+end
+
+--有取消按钮、确定按钮的提示页面
+ShowNotice = function(noticeString, onCancel, onSure)
+    this.gameObject:SetActive(true)
+    this.sureBtn.gameObject:SetActive(true)
+    this.sureBtn2.gameObject:SetActive(false)
+    this.cancelBtn.gameObject:SetActive(true)
+    this.noticeText.text = noticeString
+    this.onSure = onSure
+    this.onCancel = onCancel
+    this.rectTransform.localPosition = CS.UnityEngine.Vector2.zero
+end
+
+--没有取消按钮、只有确定按钮的提示页面
+ShowNotice = function(noticeString, onSure)
+    this.gameObject:SetActive(true)
+    this.sureBtn.gameObject:SetActive(false)
+    this.sureBtn2.gameObject:SetActive(true)
+    this.cancelBtn.gameObject:SetActive(false)
+    this.noticeText.text = noticeString
+    this.onSure = onSure
+    this.onCancel = null
+    this.rectTransform.localPosition = CS.UnityEngine.Vector2.zero
+end
+
+SureBtnClick = function()
+    this.gameObject:SetActive(false)
+    print("OnSure out")
+    if onSure ~= nil then
+        print("OnSure in")
+        this.onSure()
+    end
+end
+
+CancelBtnClick = function()
+    this.gameObject:SetActive(false)
+    print("OnCancel out")
+    if onCancel ~= nil then
+        print("OnCancel in")
+        this.onCancel()
+    end
+end

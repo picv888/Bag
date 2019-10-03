@@ -20,12 +20,6 @@ public class TipsUI : MonoBehaviour {
 
     public static TipsUI Instance {
         get {
-            /*
-            if (null == instance)
-            {
-                instance = GameObject.Find("Tips").GetComponent<TipsUI>();
-            }
-            */
             return instance;
         }
     }

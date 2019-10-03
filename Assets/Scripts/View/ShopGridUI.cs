@@ -2,19 +2,29 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 /// <summary>
 /// 商店物品格子
 /// </summary>
 ////
 public class ShopGridUI : GridBase {
-    private Text itemNameText;
-    private Text moneyText;
-    private RectTransform borderTrans;
+    public Text itemNameText;
+    public Text moneyText;
+    public RectTransform borderTrans;
     public ShopUI shopUI;
 
     protected override void Awake() {
         base.Awake();
+        if (scriptEnv != null) {
+            luaClick = scriptEnv.Get<Action<PointerEventData>>("Click");
+            luaClick = scriptEnv.Get<Action<PointerEventData>>("Click");
+            luaClick = scriptEnv.Get<Action<PointerEventData>>("Click");
+        }
+        if (luaAwake != null) {
+            luaAwake();
+            return;
+        }
         gameObject.tag = "ShopGrid";
         itemNameText = rectTransform.Find("ItemName").GetComponent<Text>();
         moneyText = rectTransform.Find("MoneyText").GetComponent<Text>();
@@ -44,6 +54,7 @@ public class ShopGridUI : GridBase {
     }
 
     //重写该方法，鼠标放在装备上时显示装备属性
+    private Action<PointerEventData> luaEnter;
     protected override void Enter(PointerEventData eventData) {
         //eventData.dragging 是否处于拖动状态， 鼠标按下，并且再移动
         if(eventData.dragging)

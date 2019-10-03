@@ -1,0 +1,118 @@
+﻿--[[
+    private ShopGridUI[] grids;
+    private Text pageText;
+    private Button rightButton;
+    private Button leftButton;
+    private Button buyButton;
+
+    private int currentNum;//当前页数
+    private int maxNum;//最大页数， 根据背包里物品数量与当前有多少个格子比较
+]]
+Awake = function()
+    --获取所有的格子
+    this.grids = this.gameObject:GetComponentsInChildren(typeof(CS.ShopGridUI))
+    this.pageText = this.transform:Find("PageText"):GetComponent("Text")
+    this.rightButton = this.transform:Find("RightButton"):GetComponent("Button")
+    this.leftButton = this.transform:Find("LeftButton"):GetComponent("Button")
+    this.buyButton = this.transform:Find("BuyBtn"):GetComponent("Button")
+
+    --按钮注册事件
+    this.rightButton.onClick:AddListener(RightClick)
+    this.leftButton.onClick:AddListener(LeftClick)
+    this.buyButton.onClick:AddListener(BuyBtnClick)
+end
+
+Start = function()
+    CS.ShopData.Instance:updateEvent("+", UpdatePanel)
+    this.currentNum = 1 --界面一开始，当前页是1
+    UpdatePanel()
+end
+
+OnDestroy = function()
+    CS.ShopData.Instance:updateEvent("-", UpdatePanel)
+end
+
+--更新界面
+UpdatePanel = function()
+    --更新当前页数的物品， 更新当前页数， 更新当前的负重
+    --计算当前的最大页数
+    this.maxNum = math.ceil(CS.ShopData.Instance.Items.Count / this.grids:GetLength())
+
+    this.pageText.text = this.currentNum .. "/" .. this.maxNum
+
+    --显示当前的页数的物品
+    --根据当前页数，确定第一个位置应该排背包数据的里的第几个索引（起始索引）
+    --模拟 格子: 20   当第一页是起始索引为0， 当第二页时起始索引为20
+    local startIndex = (this.currentNum - 1) * this.grids:GetLength() --（当前页数 - 1） * 格子数量
+
+    --把从起始索引开始，依次的把物品放在对应的格子上
+    for i = 0, this.grids:GetLength() - 1 do
+        if startIndex + i >= CS.ShopData.Instance.Items.Count - 1 then
+            --超出了物品的数量，该格子没有物品
+            this.grids:GetValue(i):UpdateItem(-1, "", "", 0)
+        else
+            local data = CS.ShopData.Instance.Items[startIndex + i]
+            grids:GetValue(i):UpdateItem(data.Id, data.IconName, data.ItemName, data.PriceBuy)
+        end
+    end
+
+    --使选中的格子的边框高亮
+    SetGridSelected()
+end
+
+--[[    
+    /// <summary>
+    /// 翻页的右按钮
+    /// </summary>
+    void RightClick() {
+        //判断是当前页是是最后一页
+        if (currentNum < maxNum) {
+            //不是最后一页
+            currentNum++;
+            ShopData.Instance.WillBuyID = -1;
+            UpdatePanel();//当前页数变了，需要更新一下界面的显示
+        }
+    }
+
+    /// <summary>
+    /// 翻页的左按钮
+    /// </summary>
+    void LeftClick() {
+        //判断当前页数是不是第一页
+        if (currentNum > 1) {
+            currentNum--;
+            ShopData.Instance.WillBuyID = -1;
+            UpdatePanel();//当前页数变了，需要更新一下界面的显示
+        }
+    }
+
+    /// <summary>
+    /// 购买按钮
+    /// </summary>
+    void BuyBtnClick() {
+        int selectedGridID = ShopData.Instance.WillBuyID;
+        if (selectedGridID >= 0) {
+            ShopController.Instance.BuyEquipment(selectedGridID, CallBack);
+        }
+    }
+
+    private void CallBack(bool isFinished, string str) {
+        //输出购买情况
+        Debug.Log(string.Format("{0}，{1}", isFinished, str));
+        if (!isFinished) {
+            NoticeUI.Instance.ShowNotice(str, null);
+        }
+    }
+
+    //显示被选择的格子
+    private void SetGridSelected() {
+        //根据想要买的装备ID计算格子ID
+        int selectedGridID = ShopData.Instance.WillBuyID;
+        selectedGridID = selectedGridID % this.grids.Length;
+        for (int i = 0; i < grids.Length; i++) {
+            ShopGridUI gi = grids[i];
+            gi.SetSelected(i == selectedGridID);
+        }
+    }
+}
+]]

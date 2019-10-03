@@ -1,0 +1,96 @@
+Awake = function()
+    this.gameObject.tag = "BagGrid"
+end
+
+Click = function(eventData)
+    print("Click")
+    if this.itemID < 0 then
+        return
+    end
+    if eventData.button == CS.UnityEngine.EventSystems.PointerEventData.InputButton.Right then
+        CS.BagController.Instance:EquipmentItem(this.itemID, CS.BagData.Instance:GetItem(this.itemID).Type, CallBck)
+    end
+end
+
+EndDrag = function(eventData)
+    if this.itemID < 0 then
+        return
+    end
+    local g = eventData.pointerCurrentRaycast.gameObject
+    if g ~= nil and g:CompareTag("ShopGrid") then
+        --当拖到商店区域时
+        --卖出物品
+        this.sellItemID = this.itemID --将要卖出的装备ID，点击了确认按钮后要用来和当前格子的装备ID比较
+        local data = CS.BagData.Instance:GetItem(this.sellItemID)
+        noticeStr = string.format("确定卖出这个装备吗？\n你将获得%d金币", data.PriceSell)
+        CS.NoticeUI.Instance:ShowNotice(
+            noticeStr,
+            function()
+                print("不卖了，装备ID" .. this.sellItemID)
+            end,
+            function()
+                SellSureCallback(this.sellItemID)
+            end
+        )
+    elseif g ~= nil and g:CompareTag("PlayerGrid") then
+        print("装备物品")
+        --获取到鼠标当前检测到的装备栏的类型
+        grid = eventData.pointerCurrentRaycast.gameObject:GetComponent("PlayerGridUI")
+        CS.BagController.Instance:EquipmentItem(this.itemID, grid.gridType, CallBck)
+    elseif g == nil then
+        --丢弃物品
+        this.sellItemID = this.itemID --将要丢弃的装备ID，点击了确认按钮后要用来和当前格子的装备ID比较
+        CS.NoticeUI.Instance:ShowNotice(
+            "确定丢弃这个装备吗？",
+            function()
+                print("不卖了，装备ID" .. this.sellItemID)
+            end,
+            function()
+                AbandonSureCallback(this.sellItemID)
+            end
+        )
+    end
+
+    --当你拖动背包的装备时，对应能装备该物品的装备栏要提示
+    CS.BagController.Instance:EndDragItem()
+end
+
+--卖出的确认回调，sellItemID为点击前确定的要卖出的装备ID
+SellSureCallback = function(sellItemID)
+    if sellItemID ~= this.itemID then
+        CS.NoticeUI.Instance:ShowNotice("卖出失败，物品不存在", nil)
+    else
+        CS.BagController.Instance:SellItem(sellItemID, CallBck)
+    end
+end
+
+--丢弃装备确认回调，sellItemID为点击前确定的要丢弃的装备ID
+AbandonSureCallback = function(sellItemID)
+    if sellItemID ~= this.itemID then
+        CS.NoticeUI.Instance:ShowNotice("丢弃失败，物品不存在", nil)
+    else
+        CS.BagController.Instance:AbandonItem(sellItemID, CallBck)
+    end
+end
+
+Drag = function(eventData)
+    --当你拖动背包的装备时，对应能装备该物品的装备栏要提示
+    CS.BagController.Instance:DragingItem(this.itemID, nil)
+end
+
+Enter = function(eventData)
+    --eventData.dragging 是否处于拖动状态， 鼠标按下，并且再移动
+    if eventData.dragging then
+        return
+    end
+    CS.TipsUI.Instance:ShowTips(this.itemID, CS.TipsUI.ItemGridType.Bag, this.transform.position)
+end
+
+CallBck = function(isFinish, message)
+    --暂时测试使用
+    if isFinish then
+        print("完成了： " .. message)
+    else
+        print(message)
+    end
+end

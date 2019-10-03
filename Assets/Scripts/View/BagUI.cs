@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BagUI : MonoBehaviour {
+public class BagUI : LuaUIBehaviour {
     private RectTransform rectTransform;
     private GridBase[] grids;
     private Text weightText;
@@ -17,34 +17,36 @@ public class BagUI : MonoBehaviour {
     private int currentNum;//当前页数
     private int maxNum;//最大页数， 根据背包里物品数量与当前有多少个格子比较
 
-    void Awake() {
-        rectTransform = transform as RectTransform;
-        //获取所有的格子
-        grids = gameObject.GetComponentsInChildren<GridBase>();
-        weightText = rectTransform.Find("CapacityText").GetComponent<Text>();
-        pageText = rectTransform.Find("PageText").GetComponent<Text>();
-        moneyText = rectTransform.Find("MoneyText").GetComponent<Text>();
-        rightButton = rectTransform.Find("RightButton").GetComponent<Button>();
-        leftButton = rectTransform.Find("LeftButton").GetComponent<Button>();
-        clearUpButton = rectTransform.Find("ClearUpButton").GetComponent<Button>();
-        sellAllBtn = rectTransform.Find("SellAllBtn").GetComponent<Button>();
+    protected override void Awake() {
+        base.Awake();
+        if (luaAwake == null) {
+            rectTransform = transform as RectTransform;
+            //获取所有的格子
+            grids = gameObject.GetComponentsInChildren<GridBase>();
+            weightText = rectTransform.Find("CapacityText").GetComponent<Text>();
+            pageText = rectTransform.Find("PageText").GetComponent<Text>();
+            moneyText = rectTransform.Find("MoneyText").GetComponent<Text>();
+            rightButton = rectTransform.Find("RightButton").GetComponent<Button>();
+            leftButton = rectTransform.Find("LeftButton").GetComponent<Button>();
+            clearUpButton = rectTransform.Find("ClearUpButton").GetComponent<Button>();
+            sellAllBtn = rectTransform.Find("SellAllBtn").GetComponent<Button>();
 
-        //按钮注册事件
-        rightButton.onClick.AddListener(RightClick);
-        leftButton.onClick.AddListener(LeftClick);
-        clearUpButton.onClick.AddListener(ClearUpClick);
-        sellAllBtn.onClick.AddListener(SellAllBtnClick);
+            //按钮注册事件
+            rightButton.onClick.AddListener(RightClick);
+            leftButton.onClick.AddListener(LeftClick);
+            clearUpButton.onClick.AddListener(ClearUpClick);
+            sellAllBtn.onClick.AddListener(SellAllBtnClick);
+        }
     }
 
 
-    private void Start() {
-        BagData.Instance.updateEvent += UpdatePanel;
-        currentNum = 1;//界面一开始，当前页是1
-        UpdatePanel();
-    }
-
-    private void OnDestroy() {
-        BagData.Instance.updateEvent -= UpdatePanel;
+    protected override void Start() {
+        base.Start();
+        if (luaStart == null) {
+            BagData.Instance.updateEvent += UpdatePanel;
+            currentNum = 1;//界面一开始，当前页是1
+            UpdatePanel();
+        }
     }
 
     /// <summary>
@@ -81,11 +83,9 @@ public class BagUI : MonoBehaviour {
             }
             else {
                 grids[i].UpdateItem(BagData.Instance.Items[startIndex + i].Id,
-                    BagData.Instance.Items[startIndex + i].IconName);
+                            BagData.Instance.Items[startIndex + i].IconName);
             }
-
         }
-
     }
 
 
@@ -93,7 +93,6 @@ public class BagUI : MonoBehaviour {
     /// 翻页的右按钮
     /// </summary>
     void RightClick() {
-        //Debug.Log("RightClick");
         //判断是当前页是是最后一页
         if (currentNum < maxNum) {
             //不是最后一页
@@ -106,7 +105,6 @@ public class BagUI : MonoBehaviour {
     /// 翻页的左按钮
     /// </summary>
     void LeftClick() {
-        //Debug.Log("LeftClick");
         //判断当前页数是不是第一页
         if (currentNum > 1) {
             currentNum--;
@@ -135,7 +133,7 @@ public class BagUI : MonoBehaviour {
     }
 
     //一键出售提示框，点击确认按钮后的回调
-    private void SellAllSureCallBack(){
+    private void SellAllSureCallBack() {
         List<EquipmentData> equipments = BagData.Instance.Items;
         if (equipments.Count == 0) {
             //背包里没有装备
@@ -143,5 +141,12 @@ public class BagUI : MonoBehaviour {
             return;
         }
         BagData.Instance.SellAllItem();
+    }
+
+    protected override void OnDestroy() {
+        base.OnDestroy();
+        if (luaOnDestroy == null) {
+            BagData.Instance.updateEvent -= UpdatePanel;
+        }
     }
 }

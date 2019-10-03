@@ -243,5 +243,4 @@ public class BagData {
             return 0;
         }
     }
-
 }

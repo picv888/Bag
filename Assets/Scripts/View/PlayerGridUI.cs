@@ -7,63 +7,77 @@ using UnityEngine.EventSystems;
 public class PlayerGridUI : GridBase {
 
     public EquipmentType gridType;
+    public Text text;
+    public GameObject border;
 
-    private Text text;
-    private GameObject border;
-	// Use this for initialization
-	protected override void Awake () {
+    protected override void Awake() {
         base.Awake();
+        if (luaAwake != null) {
+            return;
+        }
         text = transform.Find("Text").GetComponent<Text>();
         border = transform.Find("GridBorder").gameObject;
         gameObject.tag = "PlayerGrid";
         text.text = EquipmentData.GetTypeName(gridType);
     }
 
-    public override void UpdateItem(int itemID, string iconName)
-    {
+    public override void UpdateItem(int itemID, string iconName) {
         base.UpdateItem(itemID, iconName);
+        if (luaUpdateItem != null) {
+            luaUpdateItem(itemID, iconName);
+            return;
+        }
         if (itemID >= 0)//有装备
         {
             text.enabled = false;//有装备时，把装备栏的文字隐藏
         }
-        else
-        {
+        else {
             text.enabled = true;
         }
     }
 
-    protected override void BeginDrag(PointerEventData eventData)
-    {
+    protected override void BeginDrag(PointerEventData eventData) {
+        if (luaBeginDrag != null) {
+            luaBeginDrag(eventData);
+            return;
+        }
         if (itemID < 0) return;
         base.BeginDrag(eventData);
         text.enabled = true;//开始拖动时，显示文字
     }
 
-    protected override void Click(PointerEventData eventData)
-    {
+    protected override void Click(PointerEventData eventData) {
+        if (luaClick != null) {
+            luaClick(eventData);
+            return;
+        }
         if (itemID < 0) return;
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
+        if (eventData.button == PointerEventData.InputButton.Right) {
             Debug.Log("卸下： " + itemID);
             BagController.Instance.DemountItem(itemID, CallBck);
         }
     }
 
-    protected override void EndDrag(PointerEventData eventData)
-    {
+    protected override void EndDrag(PointerEventData eventData) {
+        if (luaEndDrag != null) {
+            luaEndDrag(eventData);
+            return;
+        }
         if (itemID < 0) return;
         base.EndDrag(eventData);
         text.enabled = false;//开始拖动时，显示文字
-        if (eventData.pointerCurrentRaycast.gameObject != null && 
-            eventData.pointerCurrentRaycast.gameObject.CompareTag("BagGrid"))
-        {
+        if (eventData.pointerCurrentRaycast.gameObject != null &&
+            eventData.pointerCurrentRaycast.gameObject.CompareTag("BagGrid")) {
             Debug.Log("卸下装备");
             BagController.Instance.DemountItem(itemID, CallBck);
         }
     }
 
-    protected override void Enter(PointerEventData eventData)
-    {
+    protected override void Enter(PointerEventData eventData) {
+        if (luaEnter != null) {
+            luaEnter(eventData);
+            return;
+        }
         //eventData.dragging 是否处于拖动状态， 鼠标按下，并且再移动
         if (eventData.dragging) return;
         TipsUI.Instance.ShowTips(itemID, TipsUI.ItemGridType.Player, transform.position);
@@ -72,22 +86,17 @@ public class PlayerGridUI : GridBase {
     /// <summary>
     /// 设置是否被选择，被选择时显示边框
     /// </summary>
-    public void SetSelect(bool selected){
+    public void SetSelect(bool selected) {
         border.SetActive(selected);
     }
 
-    void CallBck(bool isFinish, string message)
-    {
+    void CallBck(bool isFinish, string message) {
         //暂时测试使用
-        if (isFinish)
-        {
+        if (isFinish) {
             Debug.Log("完成了： " + message);
         }
-        else
-        {
+        else {
             Debug.LogError(message);
         }
-
     }
-
 }

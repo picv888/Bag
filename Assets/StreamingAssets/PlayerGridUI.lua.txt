@@ -1,0 +1,74 @@
+﻿--[[
+    public EquipmentType gridType;
+    public Text text;
+    public GameObject border;
+    ]]
+Awake = function()
+    this.text = this.transform:Find("Text"):GetComponent("Text")
+    this.border = this.transform:Find("GridBorder").gameObject
+    this.gameObject.tag = "PlayerGrid"
+    this.text.text = CS.EquipmentData.GetTypeName(this.gridType)
+end
+
+UpdateItem = function(itemID, iconName)
+    if this.itemID >= 0 then
+        this.text.enabled = false --有装备时，把装备栏的文字隐藏
+    else
+        this.text.enabled = true
+    end
+end
+
+BeginDrag = function(eventData)
+    if this.itemID < 0 then
+        return
+    end
+
+    this.text.enabled = true --开始拖动时，显示文字
+end
+
+Click = function(eventData)
+    if this.itemID < 0 then
+        return
+    end
+    if eventData.button == CS.UnityEngine.EventSystems.PointerEventData.InputButton.Right then
+        print("卸下： " .. this.itemID)
+        CS.BagController.Instance:DemountItem(this.itemID, CallBck)
+    end
+end
+
+EndDrag = function(eventData)
+    if this.itemID < 0 then
+        return
+    end
+
+    this.text.enabled = false --开始拖动时，显示文字
+    if
+        eventData.pointerCurrentRaycast.gameObject ~= nil and
+            eventData.pointerCurrentRaycast.gameObject:CompareTag("BagGrid")
+     then
+        print("卸下装备")
+        CS.BagController.Instance:DemountItem(this.itemID, CallBck)
+    end
+end
+
+Enter = function(eventData)
+    --eventData.dragging 是否处于拖动状态， 鼠标按下，并且再移动
+    if eventData.dragging then
+        return
+    end
+    CS.TipsUI.Instance:ShowTips(this.itemID, CS.TipsUI.ItemGridType.Player, this.transform.position)
+end
+
+--设置是否被选择，被选择时显示边框
+SetSelect = function(selected)
+    this.border:SetActive(selected)
+end
+
+CallBck = function(isFinish, message)
+    --暂时测试使用
+    if isFinish then
+        print("完成了： " .. message)
+    else
+        print("错误" .. message)
+    end
+end

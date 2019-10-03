@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//第一个参数，是是否完成， 第二个参数， 传递过去的消息
+public delegate void CallBack(bool isFinish, string message);
+
 public class BagController {
 
     #region 单例
@@ -20,9 +23,6 @@ public class BagController {
     private BagController() { }
 
     #endregion
-
-    //第一个参数，是是否完成， 第二个参数， 传递过去的消息
-    public delegate void CallBack(bool isFinish, string message);
 
     #region 处理数据的方法
 

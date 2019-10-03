@@ -1,0 +1,57 @@
+--商店物品格子
+Awake = function()
+    this.gameObject.tag = "ShopGrid"
+    this.itemNameText = this.transform:Find("ItemName"):GetComponent("Text")
+    this.moneyText = this.transform:Find("MoneyText"):GetComponent("Text")
+    this.borderTrans = this.transform:Find("GridBorder")
+    this.shopUI = this.transform:GetComponentInParent(typeof(CS.ShopUI))
+end
+
+Click = function(eventData)
+    --如果格子里面有装备，记录玩家将要买的装备ID，如果没有，记录ID为-1
+    data = CS.ShopData.Instance:GetItem(this.itemID)
+    if data == nil then
+        CS.ShopData.Instance.WillBuyID = -1
+    else
+        CS.ShopData.Instance.WillBuyID = this.itemID
+    end
+end
+
+--重写该方法，鼠标放在装备上时显示装备属性
+Enter = function(eventData)
+    --eventData.dragging 是否处于拖动状态， 鼠标按下，并且再移动
+    if eventData.dragging then
+        return
+    end
+    local data = CS.ShopData.Instance:GetItem(this.itemID)
+    CS.TipsUI.Instance:ShowTips(data, this.transform.position)
+end
+
+SetSelected = function(selected)
+    CS.borderTrans.gameObject:SetActive(selected)
+end
+
+--更新自己本身的物品
+UpdateItem = function(itemID, iconName, nameText, price)
+    if this.itemID == itemID and itemID >= 0 then
+        return
+    end
+
+    this.itemID = itemID
+
+    if itemID < 0 then --没有物品
+        this.image.enabled = false
+        this.itemNameText.enabled = false
+        this.moneyText.enabled = false
+    else
+        this.image.enabled = true
+        this.itemNameText.enabled = true
+        this.moneyText.enabled = true
+        if image.sprite == nil or image.sprite.name ~= iconName then
+            local sp = CS.UnityEngine.Resources:Load("Texture/Icon/" .. iconName)
+            this.image.sprite = sp
+        end
+        this.itemNameText.text = nameText
+        this.moneyText.text = string.format("价格:%d", price)
+    end
+end

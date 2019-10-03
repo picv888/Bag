@@ -1,0 +1,91 @@
+﻿--[[
+    private PlayerGridUI[] grids;//所有的装备栏
+    //所有显示属性的Text
+    private Text inspectorText;
+]]
+Awake = function()
+    --在子物体里获取所有的GridBase这个组件，返回的是一个数组
+    this.grids = this.gameObject:GetComponentsInChildren(typeof(CS.PlayerGridUI))
+    this.inspectorText = this.transform:Find("Message/Scroll View/Viewport/InspectorText"):GetComponent("Text")
+end
+
+Start = function()
+    CS.PlayerData.Instance:updateEvent("+", UpdatePanel)
+    UpdatePanel()
+end
+
+OnDestroy = function()
+    CS.PlayerData.Instance:updateEvent("-", UpdatePanel)
+end
+
+--更新界面的方法
+
+UpdatePanel = function()
+    --把人物身上装备的物品显示， 所有属性显示
+    --先把所有的格子清空
+    for i = 0, this.grids:GetLength() - 1 do
+        local grid = grids:GetValue(i)
+        grid:UpdateItem(-1, "")
+    end
+
+    --再把人物身上装备显示在对应的格子上
+    for i = 0, this.grids.GetLength() - 1 do
+        local grid = grids:GetValue(i)
+
+        for j = 0, CS.PlayerData.Instance.Items.Count - 1 do
+            --当格子的装备与人物数据里的装备的类型是一致时，证明该装备应该放在这个格子上
+            local equipment = CS.PlayerData.Instance.Items[j]
+            if grid.gridType == equipment.Type then
+                grid:UpdateItem(equipment.Id, equipment.IconName)
+            end
+        end
+    end
+
+    local inspectorString = ""
+    inspectorString =
+        inspectorString ..
+        "攻击力：" .. CS.PlayerData.Instance.Atk .. '<color="green"> + ' .. CS.PlayerData.Instance.AddAtk .. "</color>\n"
+    inspectorString =
+        inspectorString ..
+        "防御力：" .. CS.PlayerData.Instance.Def .. '<color="green"> + ' .. CS.PlayerData.Instance.AddDef .. "</color>\n"
+
+    inspectorString =
+        inspectorString ..
+        "暴击率：" ..
+            CS.PlayerData.Instance.Thump .. '<color="green"> + ' .. CS.PlayerData.Instance.AddThump .. "</color>\n"
+
+    inspectorString =
+        inspectorString ..
+        "生命值：" .. CS.PlayerData.Instance.Hp .. '<color="green"> + ' .. CS.PlayerData.Instance.AddHp .. "</color>\n"
+
+    inspectorString =
+        inspectorString ..
+        "魔法值：" .. CS.PlayerData.Instance.Mp .. '<color="green"> + ' .. CS.PlayerData.Instance.AddMp .. "</color>\n"
+
+    inspectorString =
+        inspectorString ..
+        "怒气值：" ..
+            CS.PlayerData.Instance.Anger .. '<color="green"> + ' .. CS.PlayerData.Instance.AddAnger .. "</color>\n"
+
+    local suits = CS.PlayerData.Instance.Suits
+    if suits.Count > 0 then
+        for i = 0, suits.Count - 1 do
+            inspectorString = inspectorString .. "\n\n" .. suits[i]:ToString()
+        end
+    end
+
+    this.inspectorText.text = inspectorString
+    SetGridSelected(CS.PlayerData.Instance.WillDressType)
+end
+
+--设置对应类型的装备格子为被选择状态（显示边框）
+SetGridSelected = function(equipmentType)
+    for i = 0, this.grids.GetLength() - 1 do
+        local grid = this.grids[i]
+        if equipmentType == grid.gridType then
+            grid:SetSelect(true)
+        else
+            grid:SetSelect(false)
+        end
+    end
+end

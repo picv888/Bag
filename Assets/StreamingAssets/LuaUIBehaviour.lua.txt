@@ -1,0 +1,7 @@
+transform = nil;
+function Start()
+	print("lua start...");
+    print("this: ",this);
+    transform = this.transform;
+    print("transform:", transform);
+end
