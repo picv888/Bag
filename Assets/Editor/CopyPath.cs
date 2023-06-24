@@ -18,9 +18,9 @@ public class CopyPath : MonoBehaviour {
         }
     }
 
-    //获取Asset中文件路径 或者 Scene中gameobject的路径
-    //快捷键alt+c
-    [MenuItem("MyUtility/CopyPath &c")]
+    //获取Asset中的文件路径 或者 Scene中gameobject的路径
+    //快捷键ctrl+alt+c
+    [MenuItem("MyUtility/CopyPath %&c")]
     private static void CopyGameObjectPath() {
         UnityEngine.Object obj = Selection.activeObject;
         if (obj == null) {
@@ -41,6 +41,7 @@ public class CopyPath : MonoBehaviour {
             }
         }
         ClipBoard.Copy(result);
+        result = string.Format("{0}{1}", "路径已复制到剪贴板：" ,result);
         Debug.Log(result);
     }
 }
